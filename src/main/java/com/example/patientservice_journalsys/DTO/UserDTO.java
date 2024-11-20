@@ -7,16 +7,16 @@ public class UserDTO {
     private Long id;
     private String userName;
     private Role role; // Keep as enum
-    private Long patientId; // Store only the patientId here (not the full PatientDTO)
+    private PatientDTO patient; // Store only the patientId here (not the full PatientDTO)
 
     private String password;
 
     // Constructor to initialize all fields
-    public UserDTO(Long id, String userName, Role role, Long patientId, String password) {
+    public UserDTO(Long id, String userName, Role role, PatientDTO patientDTO, String password) {
         this.id = id;
         this.userName = userName;
         this.role = role;
-        this.patientId = patientId; // Using patientId instead of patient
+        this.patient = patientDTO; // Using patientId instead of patient
         this.password = password;
     }
 
@@ -48,12 +48,12 @@ public class UserDTO {
         this.role = role;
     }
 
-    public Long getPatientId() {
-        return patientId; // Return patientId instead of PatientDTO
+    public PatientDTO getPatient() {
+        return patient;
     }
 
-    public void setPatientId(Long patientId) {
-        this.patientId = patientId;
+    public void setPatient(PatientDTO patient) {
+        this.patient = patient;
     }
 
     public String getPassword() {

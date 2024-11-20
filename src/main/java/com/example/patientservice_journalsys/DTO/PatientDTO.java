@@ -1,13 +1,19 @@
 package com.example.patientservice_journalsys.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
 import java.util.List;
 
 public class PatientDTO {
     private Long id;
+    @JsonProperty("name")
     private String name;
+    @JsonProperty("birthdate")
     private LocalDate birthdate;
+    @JsonProperty("userId")
     private Long userId; // Instead of embedding the entire User object
+    @JsonProperty("conditions")
     private List<ConditionDTO> conditions; // List of Condition IDs instead of ConditionDTO objects
 
     public PatientDTO(Long id, String name, LocalDate birthdate, Long userId, List<ConditionDTO> conditions) {

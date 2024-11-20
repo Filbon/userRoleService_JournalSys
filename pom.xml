@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>patientService_JournalSys</artifactId>
+    <artifactId>userRoleService_JournalSys</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>patientService_JournalSys</name>
     <description>patientService_JournalSys</description>
@@ -54,6 +54,17 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>6.1.14</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>3.3.5</version>
         </dependency>
     </dependencies>
 

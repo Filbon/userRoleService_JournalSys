@@ -2,11 +2,14 @@ package com.example.patientservice_journalsys.Service;
 
 import com.example.patientservice_journalsys.DTO.ConditionDTO;
 import com.example.patientservice_journalsys.DTO.PatientDTO;
+import com.example.patientservice_journalsys.DTO.PractitionerDTO;
 import com.example.patientservice_journalsys.DTO.UserDTO;
 import com.example.patientservice_journalsys.Model.Condition;
 import com.example.patientservice_journalsys.Model.Patient;
+import com.example.patientservice_journalsys.Model.Practitioner;
 import com.example.patientservice_journalsys.Repository.ConditionRepository;
 import com.example.patientservice_journalsys.Repository.PatientRepository;
+import com.example.patientservice_journalsys.Repository.PractitionerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +24,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class PatientService {
+public class UserRoleService {
 
     private final PatientRepository patientRepository;
     private final ConditionRepository conditionRepository;
     private final ModelMapper modelMapper;
     private final RestTemplate restTemplate; // For making API calls to User service
 
-    private static final String USER_SERVICE_URL = "http://localhost:8080/api/user"; // Adjust the base URL as needed
+    private final PractitionerRepository practitionerRepository;
+
+    private static final String USER_SERVICE_URL = "http://localhost:8082/api/user"; // Adjust the base URL as needed
 
     @Autowired
-    public PatientService(PatientRepository patientRepository,
-                          ConditionRepository conditionRepository,
-                          ModelMapper modelMapper,
-                          RestTemplate restTemplate) {
+    public UserRoleService(PatientRepository patientRepository,
+                           ConditionRepository conditionRepository,
+                           ModelMapper modelMapper,
+                           RestTemplate restTemplate,
+                           PractitionerRepository practitionerRepository) {
         this.patientRepository = patientRepository;
         this.conditionRepository = conditionRepository;
         this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
+        this.practitionerRepository = practitionerRepository;
     }
 
     // Get all patients, now directly fetching conditions from the database
@@ -48,7 +55,6 @@ public class PatientService {
 
         for (Patient patient : patients) {
             PatientDTO patientDTO = modelMapper.map(patient, PatientDTO.class);
-
             // Fetch user details via the User service using the userId stored in the patient
             String userApiUrl = USER_SERVICE_URL + "/users/{id}";
             ResponseEntity<UserDTO> userResponse = restTemplate.exchange(userApiUrl, HttpMethod.GET, null, UserDTO.class, patient.getUserId());
@@ -148,6 +154,27 @@ public class PatientService {
         patientDTO.setConditions(conditionDTOs);
 
         return patientDTO;
+    }
+
+    public void createPatient(PatientDTO patientDTO) {
+        Patient patient = new Patient();
+        patient.setName(patientDTO.getName());
+        patient.setBirthdate(patientDTO.getBirthdate());
+        patient.setUserId(patientDTO.getUserId()); // Link to the user
+        patient.setConditions(new ArrayList<>()); // Initialize with an empty list of conditions
+
+        // Save the patient to the database
+        patientRepository.save(patient);
+    }
+
+    public void createPractitioner(PractitionerDTO practitionerDTO) {
+        Practitioner practitioner = new Practitioner();
+        practitioner.setRole(practitionerDTO.getRole());
+        practitioner.setName(practitionerDTO.getName());
+        practitioner.setUserId(practitionerDTO.getUserId());
+        practitioner.setEncounters(new ArrayList<>());
+
+        practitionerRepository.save(practitioner);
     }
 }
 
