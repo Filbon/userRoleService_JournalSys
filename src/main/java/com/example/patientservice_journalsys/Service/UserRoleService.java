@@ -176,5 +176,11 @@ public class UserRoleService {
 
         practitionerRepository.save(practitioner);
     }
+
+
+    public Long getPatientIdByUserId(Long id) {
+        Patient patient = patientRepository.findByUserId(id);
+        return patient.getId();
+    }
 }
 
