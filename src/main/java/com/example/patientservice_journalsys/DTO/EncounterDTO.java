@@ -1,9 +1,12 @@
 package com.example.patientservice_journalsys.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 public class EncounterDTO {
     private Long id;
+
     private LocalDateTime encounterDate;
     private Long patientId;
     private String practitionerName;

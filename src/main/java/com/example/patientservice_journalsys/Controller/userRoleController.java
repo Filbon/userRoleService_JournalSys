@@ -1,8 +1,10 @@
 package com.example.patientservice_journalsys.Controller;
 
 import com.example.patientservice_journalsys.DTO.ConditionDTO;
+import com.example.patientservice_journalsys.DTO.EncounterDTO;
 import com.example.patientservice_journalsys.DTO.PatientDTO;
 import com.example.patientservice_journalsys.DTO.PractitionerDTO;
+import com.example.patientservice_journalsys.Model.Role;
 import com.example.patientservice_journalsys.Service.UserRoleService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -76,23 +78,54 @@ public class userRoleController {
         userRoleService.createPractitioner(practitionerDTO);
     }
 
-    @GetMapping("patientId/byUserId/{id}")
-    public ResponseEntity<?> getPatientIdByUserId(@PathVariable Long id) {
+    @GetMapping("userRoleId/byUserId/{id}/{role}")
+    public ResponseEntity<?> getUserRoleIdByUserId(@PathVariable Long id, @PathVariable String role) {
         try {
             if (id == null || id <= 0) {
                 return ResponseEntity.badRequest().body("Invalid user ID provided.");
             }
-            Long patientId = userRoleService.getPatientIdByUserId(id);
-            if (patientId == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient ID not found for user ID: " + id);
+            if(role.equals("PATIENT")) {
+                Long patientId = userRoleService.getPatientIdByUserId(id);
+                if (patientId == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient ID not found for user ID: " + id);
+                }
+                return ResponseEntity.ok(patientId);
             }
-            return ResponseEntity.ok(patientId);
+
+            if(role.equals("DOCTOR")) {
+                Long practitionerID = userRoleService.getPractitionerIdByUserId(id);
+                if(practitionerID == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Practitioner ID not found for user ID: " + id);
+                }
+                return ResponseEntity.ok(practitionerID);
+            }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid argument: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while fetching patient ID: " + e.getMessage());
         }
+        return null;
     }
+
+    @PostMapping("/practitioner/{practitionerId}/encounters")
+    public ResponseEntity<?> addEncounter(@RequestHeader("userRole") String role,
+                                          @PathVariable Long practitionerId,
+                                          @RequestBody EncounterDTO encounterDTO) {
+
+        if (!Objects.equals(role, "DOCTOR")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only DOCTORs can add encounters.");
+        }
+        try {
+            EncounterDTO createdEncounter = userRoleService.addEncounter(practitionerId, encounterDTO.getPatientId(), encounterDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdEncounter);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Practitioner or Patient not found: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while adding the encounter: " + e.getMessage());
+        }
+    }
+
 
 }

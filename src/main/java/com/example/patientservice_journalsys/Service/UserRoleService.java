@@ -1,13 +1,12 @@
 package com.example.patientservice_journalsys.Service;
 
-import com.example.patientservice_journalsys.DTO.ConditionDTO;
-import com.example.patientservice_journalsys.DTO.PatientDTO;
-import com.example.patientservice_journalsys.DTO.PractitionerDTO;
-import com.example.patientservice_journalsys.DTO.UserDTO;
+import com.example.patientservice_journalsys.DTO.*;
 import com.example.patientservice_journalsys.Model.Condition;
+import com.example.patientservice_journalsys.Model.Encounter;
 import com.example.patientservice_journalsys.Model.Patient;
 import com.example.patientservice_journalsys.Model.Practitioner;
 import com.example.patientservice_journalsys.Repository.ConditionRepository;
+import com.example.patientservice_journalsys.Repository.EncounterRepository;
 import com.example.patientservice_journalsys.Repository.PatientRepository;
 import com.example.patientservice_journalsys.Repository.PractitionerRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +31,7 @@ public class UserRoleService {
     private final RestTemplate restTemplate; // For making API calls to User service
 
     private final PractitionerRepository practitionerRepository;
+    private final EncounterRepository encounterRepository;
 
     private static final String USER_SERVICE_URL = "http://localhost:8082/api/user"; // Adjust the base URL as needed
 
@@ -40,12 +40,14 @@ public class UserRoleService {
                            ConditionRepository conditionRepository,
                            ModelMapper modelMapper,
                            RestTemplate restTemplate,
-                           PractitionerRepository practitionerRepository) {
+                           PractitionerRepository practitionerRepository,
+                           EncounterRepository encounterRepository) {
         this.patientRepository = patientRepository;
         this.conditionRepository = conditionRepository;
         this.modelMapper = modelMapper;
         this.restTemplate = restTemplate;
         this.practitionerRepository = practitionerRepository;
+        this.encounterRepository = encounterRepository;
     }
 
     // Get all patients, now directly fetching conditions from the database
@@ -181,6 +183,30 @@ public class UserRoleService {
     public Long getPatientIdByUserId(Long id) {
         Patient patient = patientRepository.findByUserId(id);
         return patient.getId();
+    }
+
+    public Long getPractitionerIdByUserId(Long id) {
+        Practitioner practitioner = practitionerRepository.findByUserId(id);
+        return  practitioner.getId();
+    }
+
+    public EncounterDTO addEncounter(Long practitionerId, Long patientId, EncounterDTO encounterDTO) {
+        Practitioner practitioner = practitionerRepository.findById(practitionerId)
+                .orElseThrow(() -> new EntityNotFoundException("Practitioner not found"));
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+
+        Encounter encounter = modelMapper.map(encounterDTO, Encounter.class);
+        encounter.setPractitioner(practitioner);
+        encounter.setPatient(patient);
+
+        Encounter savedEncounter = encounterRepository.save(encounter);
+
+        practitioner.getEncounters().add(savedEncounter);
+        practitionerRepository.save(practitioner);
+
+        return modelMapper.map(savedEncounter, EncounterDTO.class);
     }
 }
 
