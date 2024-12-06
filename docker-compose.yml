@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  journal-db:
+    image: mysql:8.0.40
+    container_name: journal-db
+    environment:
+      MYSQL_DATABASE: journalDBMicro
+      MYSQL_USER: journalUser
+      MYSQL_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - "3307:3306"
+    volumes:
+      - journal-db-data:/var/lib/mysql
+
+  user-role-service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: user-role-service
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/journalDBMicro
+      SPRING_DATASOURCE_USERNAME: journalUser
+      SPRING_DATASOURCE_PASSWORD: 1234
+    depends_on:
+      - journal-db
+    networks:
+      - user-network
+
+  user-service:
+    build:
+      context: ../userService_JournalSys  # Path to the userService project
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8082:8082"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/journalDBMicro
+      SPRING_DATASOURCE_USERNAME: journalUser
+      SPRING_DATASOURCE_PASSWORD: 1234
+    depends_on:
+      - journal-db
+    networks:
+      - user-network
+
+  message-service:
+    build:
+      context: ../messageService_JournalSys  # Path to the messageService project
+      dockerfile: Dockerfile
+    container_name: message-service
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/journalDBMicro
+      SPRING_DATASOURCE_USERNAME: journalUser
+      SPRING_DATASOURCE_PASSWORD: 1234
+    depends_on:
+      - journal-db
+    networks:
+      - user-network
+
+  node-service:
+    build:
+      context: ../image-processing-backend
+      dockerfile: Dockerfile
+    container_name: node-service
+    ports:
+      - "5000:5000"
+    networks:
+      - user-network
+
+  quarkus-reactive-service:
+    build:
+      context: ../searchservice_journalsys
+      dockerfile: Dockerfile
+    container_name: quarkus-reactive-service
+    ports:
+      - "8083:8083"
+    environment:
+      QUARKUS_DATASOURCE_DB_KIND: mysql
+      QUARKUS_DATASOURCE_REACTIVE_URL: vertx-reactive:mysql://host.docker.internal:3306/journalDBMicro
+      QUARKUS_DATASOURCE_USERNAME: journalUser
+      QUARKUS_DATASOURCE_PASSWORD: 1234
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: update
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: "true"
+    depends_on:
+      - journal-db
+    networks:
+      - user-network
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-role-service
+
+volumes:
+  journal-db-data:
+
+networks:
+  user-network:
+    driver: bridge
+
+
+
+
