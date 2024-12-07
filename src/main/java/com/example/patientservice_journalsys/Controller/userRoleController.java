@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://kubernetes.docker.internal:30000")
 @RestController
 @RequestMapping("/api/userRole")
 public class userRoleController {
