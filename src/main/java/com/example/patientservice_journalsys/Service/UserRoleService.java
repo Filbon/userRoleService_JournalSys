@@ -33,7 +33,7 @@ public class UserRoleService {
     private final PractitionerRepository practitionerRepository;
     private final EncounterRepository encounterRepository;
 
-    private static final String USER_SERVICE_URL = "http://user-service:8082/api/user"; // Adjust the base URL as needed
+    private static final String USER_SERVICE_URL = "https://userservice.app.cloud.cbh.kth.se/api/user"; // Adjust the base URL as needed
 
     @Autowired
     public UserRoleService(PatientRepository patientRepository,
