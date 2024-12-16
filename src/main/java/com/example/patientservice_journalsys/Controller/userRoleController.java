@@ -9,7 +9,6 @@ import com.example.patientservice_journalsys.Service.UserRoleService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +24,6 @@ public class userRoleController {
     public userRoleController(UserRoleService userRoleService) {
         this.userRoleService = userRoleService;
     }
-
-    @PreAuthorize("hasRole('DOCTOR')")
     @GetMapping("/patients/GetPatients")
     public ResponseEntity<List<PatientDTO>> getAllPatients(@RequestHeader("userRole") String role) {
         if (Objects.equals(role, "PATIENT")) {
@@ -45,7 +42,6 @@ public class userRoleController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/patients/{patientId}/conditions")
     public ResponseEntity<ConditionDTO> addCondition(@RequestHeader("userRole") String role, @PathVariable Long patientId,
                                                      @RequestBody ConditionDTO conditionDTO) {
@@ -60,7 +56,7 @@ public class userRoleController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasRole('DOCTOR')")
+
     @GetMapping("/patients/{id}/details")
     public ResponseEntity<PatientDTO> getPatientDetails(@RequestHeader("userRole") String role, @PathVariable Long id) {
         if (!Objects.equals(role, "DOCTOR")) {
@@ -111,8 +107,6 @@ public class userRoleController {
         }
         return null;
     }
-
-    @PreAuthorize("hasRole('DOCTOR')")
     @PostMapping("/practitioner/{practitionerId}/encounters")
     public ResponseEntity<?> addEncounter(@RequestHeader("userRole") String role,
                                           @PathVariable Long practitionerId,
