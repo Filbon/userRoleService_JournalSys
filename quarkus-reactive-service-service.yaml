@@ -16,5 +16,4 @@ spec:
       nodePort: 30083  # Static port on each node (useful for local development)
   selector:
     io.kompose.service: quarkus-reactive-service
-  annotations:
-    description: "Service to expose the Quarkus Reactive Service on NodePort 30083"
+

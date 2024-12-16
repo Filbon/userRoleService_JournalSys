@@ -5,7 +5,7 @@ FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
 # Copy the Spring Boot JAR file into the container
-COPY target/userRoleService_JournalSys-0.0.1-SNAPSHOT.jar userRoleService.jar
+COPY userRoleService_JournalSys-0.0.1-SNAPSHOT.jar userRoleService.jar
 
 # Expose the port your application runs on
 EXPOSE 8081
