@@ -131,7 +131,10 @@ public class UserRoleService {
         Condition condition = modelMapper.map(conditionDTO, Condition.class);
         condition.setPatient(patient);
 
-        // Save the condition and add it to the patient's conditions list
+        if (patient.getConditions() == null) {
+            patient.setConditions(new ArrayList<>());
+        }
+
         Condition savedCondition = conditionRepository.save(condition);
         patient.getConditions().add(savedCondition); // Add the saved condition directly to the patient's list
         patientRepository.save(patient); // Save the updated patient with the new condition
@@ -203,6 +206,9 @@ public class UserRoleService {
 
         Encounter savedEncounter = encounterRepository.save(encounter);
 
+        if (practitioner.getEncounters() == null) {
+            practitioner.setEncounters(new ArrayList<>());
+        }
         practitioner.getEncounters().add(savedEncounter);
         practitionerRepository.save(practitioner);
 
