@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  docker:
     runs-on: ubuntu-latest
 
     services:
@@ -55,29 +55,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: journalUser
           SPRING_DATASOURCE_PASSWORD: 1234
 
-      # Step 6: Upload the entire target directory as an artifact
-      - name: Upload target directory
-        uses: actions/upload-artifact@v3
-        with:
-          name: target
-          path: target  # Upload the entire target directory
-
-  docker:
-    runs-on: ubuntu-latest
-    needs: test  # This ensures the docker job runs only if the test job passes
-
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Step 2: Download the target directory artifact from the test job
-      - name: Download target directory
-        uses: actions/download-artifact@v3
-        with:
-          name: target
-
-      # Step 3: Login to Docker Registry
+      # Step 6: Login to Docker Registry
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -85,14 +63,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push Docker image
+      # Step 7: Build and push the Docker image
       - name: Build and push Docker image
-        run: |
-          # Ensure the target directory is present
-          ls -l target
-
-          # Build Docker image using the target directory
-          docker build -t ${{ secrets.DOCKER_TAG }} .
-
-          # Push the Docker image
-          docker push ${{ secrets.DOCKER_TAG }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_TAG }}
