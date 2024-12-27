@@ -55,12 +55,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: journalUser
           SPRING_DATASOURCE_PASSWORD: 1234
 
-      # Step 6: Upload the JAR file as an artifact
-      - name: Upload JAR file
+      # Step 6: Upload the entire target directory as an artifact
+      - name: Upload target directory
         uses: actions/upload-artifact@v3
         with:
-          name: app-jar
-          path: target/*.jar  # Adjust if your JAR file is in a different location
+          name: target
+          path: target  # Upload the entire target directory
 
   docker:
     runs-on: ubuntu-latest
@@ -71,11 +71,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Download the JAR file artifact from the test job
-      - name: Download JAR file
+      # Step 2: Download the target directory artifact from the test job
+      - name: Download target directory
         uses: actions/download-artifact@v3
         with:
-          name: app-jar
+          name: target
 
       # Step 3: Login to Docker Registry
       - name: Login to Docker Hub
