@@ -85,12 +85,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push the Docker image
+      # Step 4: Build and push Docker image
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_TAG }}
-          # Make sure to add the path to the JAR file in the Dockerfile
-          file: ./Dockerfile  # Adjust if necessary
+        run: |
+          # Ensure the target directory is present
+          ls -l target
+
+          # Build Docker image using the target directory
+          docker build -t ${{ secrets.DOCKER_TAG }} .
+
+          # Push the Docker image
+          docker push ${{ secrets.DOCKER_TAG }}
