@@ -9,6 +9,7 @@ import com.example.patientservice_journalsys.Service.UserRoleService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,12 +25,9 @@ public class userRoleController {
     public userRoleController(UserRoleService userRoleService) {
         this.userRoleService = userRoleService;
     }
-    @GetMapping("/patients/GetPatients")
-    public ResponseEntity<List<PatientDTO>> getAllPatients(@RequestHeader("userRole") String role) {
-        if (Objects.equals(role, "PATIENT")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Return 403 if not authorized
-        }
 
+    @GetMapping("/patients/GetPatients")
+    public ResponseEntity<List<PatientDTO>> getAllPatients() {
         List<PatientDTO> patients = userRoleService.getAllPatients();
         return ResponseEntity.ok(patients);
     }
